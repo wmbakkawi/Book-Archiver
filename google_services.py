@@ -1,7 +1,6 @@
 import os
 import io
 import json
-from google.cloud import vision
 import gspread
 from pydrive2.auth import GoogleAuth
 from pydrive2.drive import GoogleDrive
@@ -13,12 +12,8 @@ def authenticate_gcp():
     """
     creds_path = "credentials.json"
     
-    # 1. Vision API
-    if os.path.exists(creds_path):
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = creds_path
-        vision_client = vision.ImageAnnotatorClient()
-    else:
-        vision_client = None
+    # 1. Vision API - تم إيقافه واستبداله بـ Tesseract
+    vision_client = None
 
     # 2. Gspread
     if os.path.exists(creds_path):
@@ -47,24 +42,24 @@ def authenticate_gcp():
 
 def extract_text_from_image(vision_client, image_bytes):
     """
-    يأخذ الصورة المحولة إلى بايتات ويستخدم Google Vision لاستخراج النصوص منها.
-    يعيد الأسطر الأولى من النص أو رسالة خطأ.
+    يأخذ الصورة المحولة ويحاول استخراج النص باستخدام Tesseract للتغلب على الفوترة.
     """
-    if not vision_client:
-        return ["تنبيه: خدمة تحليل الصور معطلة، يرجى التحقق من ملف credentials.json"]
-    
-    image = vision.Image(content=image_bytes)
-    response = vision_client.text_detection(image=image)
-    texts = response.text_annotations
-    
-    if texts:
-        full_text = texts[0].description
-        lines = full_text.split('\n')
-        lines = [line.strip() for line in lines if line.strip()]
-        return lines
-    
-    if response.error.message:
-        raise Exception(f"خطأ في Vision API: {response.error.message}")
+    try:
+        import pytesseract
+        from PIL import Image
+        import io
+        
+        image = Image.open(io.BytesIO(image_bytes))
+        # استخراج النص باللغتين العربية والإنجليزية
+        text = pytesseract.image_to_string(image, lang='ara+eng')
+        
+        if text.strip():
+            lines = text.split('\n')
+            lines = [line.strip() for line in lines if line.strip()]
+            return lines
+            
+    except Exception as e:
+        return ["لم يتم استخراج النص آلياً (يرجى إدخال البيانات يدوياً).", "نأمل التحقق من تثبيت Tesseract."]
 
     return []
 

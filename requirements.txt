@@ -1,5 +1,6 @@
 streamlit
-google-cloud-vision
 gspread
 oauth2client
 PyDrive2
+pytesseract
+Pillow
