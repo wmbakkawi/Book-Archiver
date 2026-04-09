@@ -19,7 +19,7 @@ st.set_page_config(page_title="أرشفة الكتب", page_icon="📚", layout=
 vision_client, gc, drive = authenticate_gcp()
 
 # تحذير إذا لم يتم العثور على credentials
-if not all([vision_client, gc, drive]):
+if not all([gc, drive]):
     st.warning("⚠️ **تنبيه هام:** لم يتم العثور على ملف `credentials.json` الخاص بصلاحيات Google. التطبيق يعمل الآن في وضع الواجهة فقط ولن يتم حفظ أي بيانات. يرجى مراجعة ملف README للخطوات.")
 
 # --- إعدادات المعرفات من الشريط الجانبي ---
