@@ -2,5 +2,5 @@ streamlit
 gspread
 oauth2client
 PyDrive2
-pytesseract
+google-generativeai
 Pillow
